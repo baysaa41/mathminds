@@ -10,7 +10,7 @@ from django.db import models
 
 class AnswerChoice(models.Model):
     id = models.BigAutoField(primary_key=True)
-    problem = models.ForeignKey('Problems', models.DO_NOTHING, blank=True, null=True)
+    problem = models.ForeignKey('Problems', models.DO_NOTHING, related_name='choices', blank=True, null=True)
     label = models.CharField(max_length=64, blank=True, null=True)
     value = models.CharField(max_length=2048)
     default_score = models.BigIntegerField()
