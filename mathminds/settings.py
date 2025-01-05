@@ -32,7 +32,7 @@ ALLOWED_HOSTS = ['localhost','mathminds.local']
 # Application definition
 
 INSTALLED_APPS = [
-    'mathminds',
+    'math_app',
     'rest_framework',
     'rest_framework_simplejwt',
     'accounts',

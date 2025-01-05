@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework import generics
-from mathminds.models import Problems
+from .models import Problems
 from .serializers import ProblemSerializer
 
 class ProblemList(generics.ListCreateAPIView):

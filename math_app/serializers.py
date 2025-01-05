@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from mathminds.models import Problems
+from .models import Problems
 
 class ProblemSerializer(serializers.ModelSerializer):
     class Meta:

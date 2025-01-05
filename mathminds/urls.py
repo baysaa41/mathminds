@@ -17,9 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from math_app.views import ProblemList
+from math_app.problem_views import problem_editor
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('problems/', ProblemList.as_view(), name='problem-list'),
     path('api/', include('accounts.urls')),
+    path('problem/<int:pk>/', problem_editor, name='problem_editor'),
+    path('problem/new/', problem_editor, name='home'),
 ]
