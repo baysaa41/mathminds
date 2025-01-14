@@ -332,6 +332,9 @@ class Levels(models.Model):
         managed = False
         db_table = 'levels'
 
+    def __str__(self):
+        return self.name
+
 
 class MessageUser(models.Model):
     message = models.OneToOneField('Messages', models.DO_NOTHING, primary_key=True)  # The composite primary key (message_id, user_id) found, that is not supported. The first column is selected.

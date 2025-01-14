@@ -2,19 +2,86 @@
 
 {% block title %}
     {% if problem %}
-        Problem #{{ problem.id }}
+        Бодлого #{{ problem.id }}
     {% else %}
-        New Problem
+        Шинэ бодлого
     {% endif %}
 {% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2>{% if problem %}Edit Problem #{{ problem.id }}{% else %}New Problem{% endif %}</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Save</button>
-    </form>
+    <h2>{% if problem %}Бодлого #{{ problem.id }}{% else %}Шинэ бодлого{% endif %}</h2>
+<form method="POST">
+  {% csrf_token %}
+  {{ form.as_p }}
+
+{% if problem.type > 0 %}
+  <!-- Render existing choices -->
+    {% if problem.choices.all|length > 0 %}
+  <h3>Сонголтууд</h3>
+  {% for choice in problem.choices.all|dictsort:"label" %}
+    <div>
+      <input type="checkbox" name="remove_choice" value="{{ choice.id }}" />
+      <label for="label_{{ choice.id }}">Сонголт</label>
+      <input type="text" name="label_{{ choice.id }}" value="{{ choice.label }}" />
+
+      <label for="value_{{ choice.id }}">Утга</label>
+      <input type="text" name="value_{{ choice.id }}" value="{{ choice.value }}" />
+
+      <label for="default_score_{{ choice.id }}">Оноо</label>
+      <input type="number" name="default_score_{{ choice.id }}" value="{{ choice.default_score }}" />
+
+      <label for="description_{{ choice.id }}">Тайлбар</label>
+      <input type="text" name="description_{{ choice.id }}">{{ choice.description }}</input>
+    </div>
+  {% endfor %}
+        {% endif %}
+
+  <!-- Add new choices -->
+  <h3>Шинэ сонголт нэмэх</h3>
+  <div id="new-choices">
+    <div class="new-choice">
+      <label for="new_label">Сонголт</label>
+      <input type="text" name="new_label" />
+
+      <label for="new_value">Утга</label>
+      <input type="text" name="new_value" />
+
+      <label for="new_default_score">Оноо</label>
+      <input type="number" name="new_default_score" />
+
+      <label for="new_description">Тайлбар</label>
+      <input type="text" name="new_description"></input>
+    </div>
+  </div>
+
+  <button type="button" onclick="addNewChoice()">Сонгол нэмэх</button>
+
+{% endif %}
+  <button type="submit">Хадгалах</button>
+</form>
+
+<script>
+  function addNewChoice() {
+    const newChoiceTemplate = `
+      <div id="new-choices">
+        <div class="new-choice">
+          <label for="new_label">Сонголт</label>
+          <input type="text" name="new_label" />
+
+          <label for="new_value">Утга</label>
+          <input type="text" name="new_value" />
+
+          <label for="new_default_score">Оноо</label>
+          <input type="number" name="new_default_score" />
+
+          <label for="new_description">Тайлбар</label>
+          <input type="text" name="new_description"></input>
+        </div>`;
+    document.getElementById('new-choices').insertAdjacentHTML('beforeend', newChoiceTemplate);
+  }
+</script>
+
+
 </div>
 {% endblock %}
