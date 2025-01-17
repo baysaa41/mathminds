@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Problems, AnswerChoice
+from .models import Problems, AnswerChoice, Solutions
 
 class AnswerChoiceSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
@@ -8,12 +8,18 @@ class AnswerChoiceSerializer(serializers.ModelSerializer):
         model = AnswerChoice
         fields = ['id', 'label', 'value', 'default_score', 'description']
 
+class SolutionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Solutions
+        fields = ['id', 'solution', 'hint']
+
 class ProblemSerializer(serializers.ModelSerializer):
     choices = AnswerChoiceSerializer(many=True)
+    solutions = SolutionSerializer(many=True)
 
     class Meta:
         model = Problems
-        fields = ['id', 'type', 'title', 'statement', 'answer', 'rendering', 'level', 'choices', 'is_published']
+        fields = ['id', 'type', 'title', 'statement', 'answer', 'rendering', 'level', 'choices', 'solutions', 'is_published']
 
     def update(self, instance, validated_data):
         instance.type = validated_data.get('type', instance.type)

@@ -4,6 +4,30 @@ from math_app.models import Problems, AnswerChoice
 from .forms import ProblemForm, AnswerChoiceForm
 from math_app.serializers import ProblemSerializer, AnswerChoiceSerializer
 from rest_framework import generics
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+
+class ProblemSearch(APIView):
+    def get(self, request):
+        query = request.GET.get('q', '')
+
+        if not query:
+            return Response({'error': 'No search term provided'}, status=400)
+
+        search_vector = (SearchVector('title', weight='A') +
+                         SearchVector('statement', weight='B') +
+                         SearchVector('solutions__solution', weight='C') +
+                         SearchVector('solutions__hint', weight='D'))
+        search_query = SearchQuery(query)
+
+        problems = Problems.objects.annotate(
+            rank=SearchRank(search_vector, search_query)
+        ).filter(rank__gte=0.1).order_by('-rank')
+
+        serializer = ProblemSerializer(problems, many=True)
+        return Response(serializer.data)
 
 def problem_editor(request, pk=None):
     problem = get_object_or_404(Problems, pk=pk) if pk else None

@@ -5,6 +5,7 @@
 #   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
+from django.contrib.postgres.search import SearchVectorField, SearchVector
 from django.db import models
 
 
@@ -405,16 +406,6 @@ class Points(models.Model):
         db_table = 'points'
 
 
-class ProblemComments(models.Model):
-    problem = models.OneToOneField('Problems', models.DO_NOTHING, primary_key=True)  # The composite primary key (problem_id, comment_id) found, that is not supported. The first column is selected.
-    comment = models.OneToOneField(Comments, models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'problem_comments'
-        unique_together = (('problem', 'comment'),)
-
-
 class Problems(models.Model):
     id = models.BigAutoField(primary_key=True)
     level = models.ForeignKey(Levels, models.DO_NOTHING, blank=True, null=True)
@@ -428,36 +419,19 @@ class Problems(models.Model):
     mute_comments = models.BooleanField(blank=True, null=True)
     success_rate = models.FloatField(blank=True, null=True)
     is_published = models.BooleanField(blank=True, null=True)
+    search_vector = SearchVectorField(null=True)
 
     class Meta:
         managed = False
         db_table = 'problems'
 
-
-class ProductComments(models.Model):
-    solution = models.OneToOneField('Products', models.DO_NOTHING, primary_key=True)  # The composite primary key (solution_id, comment_id) found, that is not supported. The first column is selected.
-    comment = models.ForeignKey(Comments, models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'product_comments'
-        unique_together = (('solution', 'comment'),)
-
-
-class Products(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    owner = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True)
-    category = models.ForeignKey(Categories, models.DO_NOTHING, blank=True, null=True)
-    name = models.CharField(max_length=256)
-    description = models.TextField()
-    picture_url = models.CharField(max_length=512)
-    remaining = models.BigIntegerField()
-    price = models.BigIntegerField()
-    status = models.BigIntegerField()
-
-    class Meta:
-        managed = False
-        db_table = 'products'
+    def save(self, *args, **kwargs):
+        self.search_vector = (
+            SearchVector('title', weight='A') +
+            SearchVector('statement', weight='B') +
+            SearchVector('answer', weight='C')
+        )
+        super().save(*args, **kwargs)
 
 
 class Provinces(models.Model):
@@ -467,20 +441,6 @@ class Provinces(models.Model):
     class Meta:
         managed = False
         db_table = 'provinces'
-
-
-class Purchases(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    costumer = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True)
-    product = models.ForeignKey(Products, models.DO_NOTHING, blank=True, null=True)
-    number_of_items = models.BigIntegerField()
-    unit_price = models.BigIntegerField()
-    total_price = models.BigIntegerField()
-    purchase_date = models.DateTimeField()
-
-    class Meta:
-        managed = False
-        db_table = 'purchases'
 
 
 class QuizGroup(models.Model):
@@ -600,16 +560,22 @@ class SolutionFormula(models.Model):
 
 class Solutions(models.Model):
     id = models.BigAutoField(primary_key=True)
-    problem = models.ForeignKey(Problems, models.DO_NOTHING)
+    problem = models.ForeignKey(Problems, models.DO_NOTHING, related_name='solutions')
     author = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True)
     hint = models.TextField(blank=True, null=True)
     solution = models.TextField(blank=True, null=True)
     note = models.TextField(blank=True, null=True)
     mute_comments = models.BooleanField()
+    search_vector = SearchVectorField(null=True)
 
     class Meta:
         managed = False
         db_table = 'solutions'
+
+    def save(self, *args, **kwargs):
+        from django.contrib.postgres.search import SearchVector
+        self.search_vector = SearchVector('solution', weight='C') + SearchVector('hint', weight='D')
+        super().save(*args, **kwargs)
 
 
 class TeacherGroup(models.Model):
