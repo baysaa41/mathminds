@@ -364,28 +364,6 @@ class Messages(models.Model):
         db_table = 'messages'
 
 
-class MixerItems(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    mixer = models.ForeignKey('Mixers', models.DO_NOTHING, blank=True, null=True)
-    collection = models.ForeignKey(Collections, models.DO_NOTHING, blank=True, null=True)
-    collection_order = models.BigIntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'mixer_items'
-
-
-class Mixers(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    author = models.ForeignKey('Users', models.DO_NOTHING, db_column='author', blank=True, null=True)
-    name = models.CharField(max_length=60, blank=True, null=True)
-    description = models.CharField(max_length=512, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'mixers'
-
-
 class Newkeys(models.Model):
     id = models.BigAutoField(primary_key=True)
     keyword = models.CharField(max_length=128, blank=True, null=True)
