@@ -5,8 +5,11 @@
 #   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
-from django.contrib.postgres.search import SearchVectorField, SearchVector
+from django.contrib.postgres.search import SearchVector, SearchVectorField
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.db import models
+from django.db.models import F
 
 
 class AnswerChoice(models.Model):
@@ -384,6 +387,7 @@ class Points(models.Model):
         db_table = 'points'
 
 
+
 class Problems(models.Model):
     id = models.BigAutoField(primary_key=True)
     level = models.ForeignKey(Levels, models.DO_NOTHING, blank=True, null=True)
@@ -397,19 +401,21 @@ class Problems(models.Model):
     mute_comments = models.BooleanField(blank=True, null=True)
     success_rate = models.FloatField(blank=True, null=True)
     is_published = models.BooleanField(blank=True, null=True)
-    search_vector = SearchVectorField(null=True)
+    search_vector = SearchVectorField(null=True, editable=False, db_index=True)  # ✅ This should now work
 
     class Meta:
-        managed = False
         db_table = 'problems'
+        managed = True  # ✅ Enable this if you want Django to create/migrate the table
 
-    def save(self, *args, **kwargs):
-        self.search_vector = (
-            SearchVector('title', weight='A') +
-            SearchVector('statement', weight='B') +
-            SearchVector('answer', weight='C')
-        )
-        super().save(*args, **kwargs)
+# Use a pre-save signal to update the search vector before saving
+@receiver(pre_save, sender=Problems)
+def update_search_vector(sender, instance, **kwargs):
+    from django.db.models import F
+    from django.contrib.postgres.search import SearchVector
+
+    instance.search_vector = SearchVector(F('title'), weight='A') + \
+                             SearchVector(F('statement'), weight='B') + \
+                             SearchVector(F('answer'), weight='C')
 
 
 class Provinces(models.Model):
