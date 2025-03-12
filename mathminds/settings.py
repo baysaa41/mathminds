@@ -26,7 +26,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['localhost','mathminds.club','api.mathminds.club','www.mathminds.club']
+ALLOWED_HOSTS = ['127.0.0.1','localhost','mathminds.club','api.mathminds.club','www.mathminds.club']
 
 
 # Application definition
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
 ]
 
 REST_FRAMEWORK = {
