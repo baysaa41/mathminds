@@ -67,6 +67,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://mathminds-react.local",
     "https://api.mathminds.club",
+    "https://mathminds.club",
+    "https://www.mathminds.club",
 ]
 
 ROOT_URLCONF = 'mathminds.urls'
